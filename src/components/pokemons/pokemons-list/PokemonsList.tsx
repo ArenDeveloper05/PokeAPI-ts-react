@@ -1,25 +1,51 @@
-import { memo, useEffect, useState } from "react";
-import { fetchPokemons, IPokemon } from "../../../api/pokemonsApi";
+import { memo, useCallback, useEffect, useState } from "react";
+import {
+  fetchPokemons,
+  fetchPokemon,
+  IPokemon,
+} from "../../../api/pokemonsApi";
 import PageLoader from "../../page-loader/PageLoader";
 import { PokemonsListWrapper } from "./PokemonsList.styled";
 import PokemonsListItem from "./PokemonsListItem";
 
 const PokemonsList = () => {
   const [loading, setLoading] = useState(false);
-  const [pokemons, setPokemons] = useState<IPokemon[]>();
+  const [loadMore, setLoadMore] = useState<string | null>(
+    "https://pokeapi.co/api/v2/pokemon?limit=20"
+  );
+  const [allPokemons, setAllPokemons] = useState<IPokemon[]>([]);
   const [err, setErr] = useState<Error>();
 
-  useEffect(() => {
+  const getAllPokemonsData = useCallback((loadMore: string | null) => {
     setLoading(true);
-    fetchPokemons()
+    fetchPokemons(loadMore)
       .then((res) => {
-        setPokemons(res.results);
+        setLoadMore(res.next);
+
+        for (let i = 0; i < res.results.length; i++) {
+          const element = res.results[i];
+          fetchPokemon(element.name).then((pokemon) => {
+            setAllPokemons((prev) => [
+              ...prev,
+              {
+                name: pokemon.name,
+                sprites: pokemon.sprites,
+                id: pokemon.id,
+                types: pokemon.types,
+              },
+            ]);
+          });
+        }
       })
       .catch((err) => setErr(err))
       .finally(() => {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    getAllPokemonsData(loadMore);
+  }, [getAllPokemonsData]);
 
   if (loading) {
     return <PageLoader />;
@@ -34,11 +60,26 @@ const PokemonsList = () => {
           {err.message}
         </div>
       ) : (
-        <div className="pokemons">
-          {pokemons?.map((pokemon, idx) => (
-            <PokemonsListItem key={idx} name={pokemon.name} url={pokemon.url} />
-          ))}
-        </div>
+        <>
+          <h1>POKEMONS</h1>
+          <div className="pokemons">
+            {allPokemons?.map((pokemon, idx) => (
+              <PokemonsListItem
+                key={pokemon.id}
+                name={pokemon.name}
+                url={pokemon.sprites.other.dream_world.front_default}
+                id={pokemon.id}
+                type={pokemon.types[0].type.name}
+              />
+            ))}
+          </div>
+          <button
+            className="load-more"
+            onClick={() => getAllPokemonsData(loadMore)}
+          >
+            Load More
+          </button>
+        </>
       )}
     </PokemonsListWrapper>
   );

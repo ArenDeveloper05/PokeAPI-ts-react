@@ -1,5 +1,10 @@
+import { useParams } from "react-router-dom";
+import SinglePokemon from "../components/pokemons/single-pokemon/SinglePokemon";
+
 const PokemonPage = () => {
-  return <div>PokemonPage</div>;
+  const { name } = useParams();
+
+  return <SinglePokemon name={name} />;
 };
 
 export default PokemonPage;
