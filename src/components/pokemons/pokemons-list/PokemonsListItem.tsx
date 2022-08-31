@@ -7,7 +7,9 @@ type PokemonsListItemProps = {
   url: string;
   id: number;
   type: string;
+  // type: keyof typeof colors;
 };
+
 const colors = {
   fire: "#FDDFDF",
   grass: "#DEFDE0",

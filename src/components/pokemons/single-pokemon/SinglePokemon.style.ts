@@ -20,6 +20,11 @@ export const SinglePokemonWrapper = styled.div`
     &:hover {
       transform: scale(1.2);
     }
+    @media only screen and (max-width: 1200px) {
+      & {
+        flex-direction: column;
+      }
+    }
     div {
       display: flex;
       align-items: center;

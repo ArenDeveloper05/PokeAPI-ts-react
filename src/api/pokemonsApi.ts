@@ -36,18 +36,7 @@ export type ISingleRoutPokemon = {
   base_experience: number;
   weight: number;
   height: number;
-  types: [
-    {
-      type: {
-        name: string;
-      };
-    },
-    {
-      type: {
-        name: string;
-      };
-    }
-  ];
+  types: IType[];
   sprites: {
     other: {
       dream_world: {
@@ -57,10 +46,16 @@ export type ISingleRoutPokemon = {
   };
 };
 
-export const fetchPokemons = async (url: any) => {
+type IType = {
+  type: {
+    name: string;
+  };
+};
+export const fetchPokemons = async (offset: number) => {
   try {
-    const { data } = await api.get<IPokemonsList>(url);
-    console.log(data);
+    const { data } = await api.get<IPokemonsList>(
+      `https://pokeapi.co/api/v2/pokemon?limit=20&offset=${offset}`
+    );
 
     return data;
   } catch (e) {
@@ -73,7 +68,6 @@ export const fetchPokemon = async (name: any) => {
     const { data } = await api.get<IPokemon>(
       `https://pokeapi.co/api/v2/pokemon/${name}`
     );
-    // console.log(data);
 
     return data;
   } catch (e) {
@@ -86,7 +80,6 @@ export const fetchSinglePokemon = async (name: any) => {
     const { data } = await api.get<ISingleRoutPokemon>(
       `https://pokeapi.co/api/v2/pokemon/${name}`
     );
-    console.log(data);
 
     return data;
   } catch (e) {

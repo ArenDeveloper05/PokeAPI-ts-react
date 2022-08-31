@@ -4,7 +4,7 @@ import { fetchSinglePokemon } from "../../../api/pokemonsApi";
 import { ISingleRoutPokemon } from "../../../api/pokemonsApi";
 
 type iSinglePokemon = {
-  name: string | undefined;
+  name: string;
 };
 
 const SinglePokemon: FC<iSinglePokemon> = ({ name }) => {
@@ -14,7 +14,6 @@ const SinglePokemon: FC<iSinglePokemon> = ({ name }) => {
   useEffect(() => {
     fetchSinglePokemon(name).then((res) => {
       setSinglePokemonData(res);
-      //   console.log(res);
     });
   }, [name]);
 

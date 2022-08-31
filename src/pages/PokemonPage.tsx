@@ -4,7 +4,7 @@ import SinglePokemon from "../components/pokemons/single-pokemon/SinglePokemon";
 const PokemonPage = () => {
   const { name } = useParams();
 
-  return <SinglePokemon name={name} />;
+  return <SinglePokemon name={name!} />;
 };
 
 export default PokemonPage;

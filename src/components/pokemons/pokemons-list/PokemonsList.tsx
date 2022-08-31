@@ -10,18 +10,15 @@ import PokemonsListItem from "./PokemonsListItem";
 
 const PokemonsList = () => {
   const [loading, setLoading] = useState(false);
-  const [loadMore, setLoadMore] = useState<string | null>(
-    "https://pokeapi.co/api/v2/pokemon?limit=20"
-  );
+  const [offset, setOffset] = useState(0);
   const [allPokemons, setAllPokemons] = useState<IPokemon[]>([]);
   const [err, setErr] = useState<Error>();
 
-  const getAllPokemonsData = useCallback((loadMore: string | null) => {
+  const getAllPokemonsData = useCallback((offset: number) => {
     setLoading(true);
-    fetchPokemons(loadMore)
-      .then((res) => {
-        setLoadMore(res.next);
 
+    fetchPokemons(offset)
+      .then((res) => {
         for (let i = 0; i < res.results.length; i++) {
           const element = res.results[i];
           fetchPokemon(element.name).then((pokemon) => {
@@ -44,15 +41,21 @@ const PokemonsList = () => {
   }, []);
 
   useEffect(() => {
-    getAllPokemonsData(loadMore);
-  }, [getAllPokemonsData]);
+    console.log("allPokemons", allPokemons);
+  }, [allPokemons]);
 
-  if (loading) {
-    return <PageLoader />;
-  }
+  const handleLoadMore = useCallback(() => {
+    setOffset((prev) => prev + 20);
+  }, []);
+
+  useEffect(() => {
+    console.log("offset", offset);
+    getAllPokemonsData(offset);
+  }, [getAllPokemonsData, offset]);
 
   return (
     <PokemonsListWrapper>
+      {loading && <PageLoader />}
       {err ? (
         <div
           style={{ color: "red", display: "flex", justifyContent: "center" }}
@@ -73,10 +76,7 @@ const PokemonsList = () => {
               />
             ))}
           </div>
-          <button
-            className="load-more"
-            onClick={() => getAllPokemonsData(loadMore)}
-          >
+          <button className="load-more" onClick={handleLoadMore}>
             Load More
           </button>
         </>
