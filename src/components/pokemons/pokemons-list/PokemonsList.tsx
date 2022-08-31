@@ -1,14 +1,20 @@
 import { memo, useCallback, useEffect, useState } from "react";
+import { useInView } from "react-intersection-observer";
 import {
   fetchPokemons,
   fetchPokemon,
   IPokemon,
 } from "../../../api/pokemonsApi";
-import PageLoader from "../../page-loader/PageLoader";
+import Loader from "../../loader/Loader";
 import { PokemonsListWrapper } from "./PokemonsList.styled";
 import PokemonsListItem from "./PokemonsListItem";
 
 const PokemonsList = () => {
+  const { ref: bottomRef, inView } = useInView({
+    threshold: 1,
+    rootMargin: "100px",
+  });
+
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
   const [allPokemons, setAllPokemons] = useState<IPokemon[]>([]);
@@ -40,22 +46,23 @@ const PokemonsList = () => {
       });
   }, []);
 
-  useEffect(() => {
-    console.log("allPokemons", allPokemons);
-  }, [allPokemons]);
-
   const handleLoadMore = useCallback(() => {
     setOffset((prev) => prev + 20);
   }, []);
 
   useEffect(() => {
-    console.log("offset", offset);
     getAllPokemonsData(offset);
   }, [getAllPokemonsData, offset]);
 
+  useEffect(() => {
+    console.log(inView);
+    if (inView) {
+      handleLoadMore();
+    }
+  }, [inView, handleLoadMore]);
+
   return (
     <PokemonsListWrapper>
-      {loading && <PageLoader />}
       {err ? (
         <div
           style={{ color: "red", display: "flex", justifyContent: "center" }}
@@ -66,7 +73,7 @@ const PokemonsList = () => {
         <>
           <h1>POKEMONS</h1>
           <div className="pokemons">
-            {allPokemons?.map((pokemon, idx) => (
+            {allPokemons?.map((pokemon) => (
               <PokemonsListItem
                 key={pokemon.id}
                 name={pokemon.name}
@@ -76,9 +83,13 @@ const PokemonsList = () => {
               />
             ))}
           </div>
-          <button className="load-more" onClick={handleLoadMore}>
+          {allPokemons.length !== 0 && (
+            <div ref={bottomRef} style={{ width: "100%", height: "1px" }} />
+          )}
+          {loading && <Loader />}
+          {/* <button className="load-more" onClick={handleLoadMore}>
             Load More
-          </button>
+          </button> */}
         </>
       )}
     </PokemonsListWrapper>
